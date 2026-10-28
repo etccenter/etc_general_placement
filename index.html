@@ -528,7 +528,10 @@
             <h2>Admin Dashboard - Test Takers</h2>
             <div style="margin: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
                 <p>All recorded submissions synced via Sheety API.</p>
-                <button class="btn" onclick="closeAdminPanel()" style="padding: 0.4rem 1rem;">Close</button>
+                <div>
+                    <button class="btn" onclick="exportToExcel()" style="padding: 0.4rem 1rem; margin-right: 0.5rem; background-color: #2e7d32;">Export to Excel</button>
+                    <button class="btn" onclick="closeAdminPanel()" style="padding: 0.4rem 1rem;">Close</button>
+                </div>
             </div>
             <div class="table-responsive">
                 <table>
@@ -941,6 +944,37 @@
                     </tr>
                 `;
             });
+        }
+
+        // Export to Excel function for Admin Panel
+        function exportToExcel() {
+            let testTakers = JSON.parse(localStorage.getItem('etc_test_takers') || '[]');
+            if (testTakers.length === 0) {
+                alert("No submissions available to export.");
+                return;
+            }
+
+            let csvContent = "\uFEFFTimestamp,Name,Email,Phone,Score,Level\n";
+            testTakers.forEach(item => {
+                let row = [
+                    `"${new Date(item.timestamp).toLocaleString()}"`,
+                    `"${item.name}"`,
+                    `"${item.email}"`,
+                    `"${item.phone}"`,
+                    item.score,
+                    `"${item.level}"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "ETC_Placement_Test_Submissions.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
